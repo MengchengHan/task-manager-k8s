@@ -58,7 +58,7 @@ else
     --type='json' \
     -p='[
       {"op":"add","path":"/spec/template/spec/containers/0/args/-","value":"--kubelet-insecure-tls"},
-      {"op":"add","path":"/spec/template/spec/containers/0/args/-","value":"--metric-resolution=5s"}
+      {"op":"add","path":"/spec/template/spec/containers/0/args/-","value":"--metric-resolution=15s"}
     ]'
 
   echo "    Esperando a que metrics-server esté listo..."
