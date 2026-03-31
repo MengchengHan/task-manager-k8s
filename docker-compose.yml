@@ -14,6 +14,14 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
+    securityContext:
+      allowPrivilegeEscalation: false
+      runAsNonRoot: true
+      runAsUser: 999
+      capabilities:
+        drop: ["ALL"]
+      seccompProfile:
+        type: RuntimeDefault
 
   api:
     build: ./api
@@ -27,6 +35,14 @@ services:
       db:
         condition: service_healthy
     networks: [task-network]
+    securityContext:
+      allowPrivilegeEscalation: false
+      runAsNonRoot: true
+      runAsUser: 1000
+      capabilities:
+        drop: ["ALL"]
+      seccompProfile:
+        type: RuntimeDefault
 
   nginx:
     build: ./nginx
@@ -34,7 +50,14 @@ services:
       - "8080:8080"
     depends_on: [api]
     networks: [task-network]
-
+    securityContext:
+      allowPrivilegeEscalation: false
+      runAsNonRoot: true
+      runAsUser: 101
+      capabilities:
+        drop: ["ALL"]
+      seccompProfile:
+        type: RuntimeDefault
 volumes:
   db_data:
 
