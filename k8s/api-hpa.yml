@@ -1,0 +1,34 @@
+# k8s/api-hpa.yml
+# HorizontalPodAutoscaler — escala la API según uso de CPU
+
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: api-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: api
+  minReplicas: 1
+  maxReplicas: 8
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 20    # Umbral bajo para demo (producción: 60-80%)
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 10
+      policies:
+      - type: Pods
+        value: 4
+        periodSeconds: 10
+    scaleDown:
+      stabilizationWindowSeconds: 10
+      policies:
+      - type: Pods
+        value: 2
+        periodSeconds: 10

@@ -1,0 +1,42 @@
+services:
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB:       tasks_db
+      POSTGRES_USER:     taskuser
+      POSTGRES_PASSWORD: taskpass
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks: [task-network]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U taskuser -d tasks_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build: ./api
+    environment:
+      DB_HOST:     db
+      DB_PORT:     "5432"
+      DB_NAME:     tasks_db
+      DB_USER:     taskuser
+      DB_PASSWORD: taskpass
+    depends_on:
+      db:
+        condition: service_healthy
+    networks: [task-network]
+
+  nginx:
+    build: ./nginx
+    ports:
+      - "8080:8080"
+    depends_on: [api]
+    networks: [task-network]
+
+volumes:
+  db_data:
+
+networks:
+  task-network:

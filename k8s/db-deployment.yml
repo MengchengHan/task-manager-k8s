@@ -1,0 +1,68 @@
+# k8s/db-deployment.yml
+# Base de datos PostgreSQL con almacenamiento persistente
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: db-pvc
+spec:
+  accessModes: [ReadWriteOnce]
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: db
+spec:
+  replicas: 1           # PostgreSQL NO escala horizontalmente sin configuración adicional
+  selector:
+    matchLabels:
+      app: db
+  template:
+    metadata:
+      labels:
+        app: db
+    spec:
+      containers:
+      - name: db
+        image: postgres:16-alpine
+        ports:
+        - containerPort: 5432
+        env:
+        - name: POSTGRES_DB
+          value: "tasks_db"
+        - name: POSTGRES_USER
+          value: "taskuser"
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: db-secret
+              key: db-password
+        volumeMounts:
+        - name: db-data
+          mountPath: /var/lib/postgresql/data
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "50m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+      volumes:
+      - name: db-data
+        persistentVolumeClaim:
+          claimName: db-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: db
+spec:
+  selector:
+    app: db
+  ports:
+  - port: 5432
+    targetPort: 5432
+  # ClusterIP por defecto → solo acceso interno
