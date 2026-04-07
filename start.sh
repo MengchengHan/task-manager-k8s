@@ -31,6 +31,10 @@ kubectl apply -f k8s/
 # ── 4. Esperar pods ─────────────────────────────────────────────
 echo ""
 echo "▶ [4/4] Esperando a que los pods estén listos..."
+
+# Esperar un par de segundos para que Kubernetes comience a programar los pods
+sleep 3
+
 kubectl wait --for=condition=ready pod --all --timeout=180s
 
 echo ""
